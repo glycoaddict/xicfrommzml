@@ -90,6 +90,7 @@ def get_list_of_ions(gradient='long'):
 
 def do_xic(filename_in, pickle_save_name):
     # filename_in = r'O:\Analytics\Lab data backup\Orbitrap Fusion\2019\Apr\Calnexin\sCANX_New_Ctrl_Try+GluC_24ug_4ug_ul_C18_OT_EtHCD40_targeted_mz200_2000_90min_RD7_2.mzML'
+    # this replaces an obsolete OBO entry with a valid one; needed for MSConverted mzml files.
     filename_in = fix_obo_in_mzml_file(filename_in)
 
     combined_dfs = OrderedDict()
@@ -140,7 +141,7 @@ def plot_xic_from_pickle(pkl_file_name):
     show(p)
 
 
-def plot_butterfly_xic_from_pickles(pkl_file_name1, pkl_file_name2):
+def plot_butterfly_xic_from_pickles(pkl_file_name1, pkl_file_name2, rt_correction=(0,0)):
 
     with open(pkl_file_name1, 'rb') as f:
         combined_dict_of_dfs1 = pickle.load(f)
@@ -151,7 +152,7 @@ def plot_butterfly_xic_from_pickles(pkl_file_name1, pkl_file_name2):
 
         for key_name, ion_tuple in zip(combined_dict_of_dfs1, get_list_of_ions()):
             a = combined_dict_of_dfs1[key_name]
-            p.line(a['rt'], a['intensity'], line_width=2, legend=ion_tuple[3], color=ion_tuple[4],
+            p.line(a['rt']+rt_correction[0], a['intensity'], line_width=2, legend=ion_tuple[3], color=ion_tuple[4],
                    )
 
             AUC1 += np.trapz(y=a['intensity'])
@@ -161,7 +162,7 @@ def plot_butterfly_xic_from_pickles(pkl_file_name1, pkl_file_name2):
         AUC2 = 0
         for key_name, ion_tuple in zip(combined_dict_of_dfs2, get_list_of_ions()):
             a = combined_dict_of_dfs2[key_name]
-            p.line(a['rt'], -a['intensity'], line_width=2, legend=ion_tuple[3], color=ion_tuple[4])
+            p.line(a['rt']+rt_correction[1], -a['intensity'], line_width=2, legend=ion_tuple[3], color=ion_tuple[4])
             AUC2 += np.trapz(y=a['intensity'])
 
     output_file('butterfly.html')
@@ -182,38 +183,38 @@ def plot_butterfly_xic_from_pickles(pkl_file_name1, pkl_file_name2):
                        text='AUC(Control/DOX)={:.4f}'.format(AUC1/AUC2), render_mode='css',
                        text_align='right')
                  )
-    p.add_layout(Label(x=7.9, y=1.4e6,
-                       text='0-NeuAc', render_mode='css',
-                       text_align='center',
-                       text_color='blue')
-                 )
-    p.add_layout(Label(x=8.7, y=1.4e6,
-                       text='1-NeuAc', render_mode='css',
-                       text_align='center',
-                       text_color='orange')
-                 )
-    p.add_layout(Label(x=9.9, y=1.4e6,
-                       text='2-NeuAc & Extended', render_mode='css',
-                      text_align='left',
-                       text_color='green')
-                 )
+    # p.add_layout(Label(x=7.9, y=1.4e6,
+    #                    text='0-NeuAc', render_mode='css',
+    #                    text_align='center',
+    #                    text_color='blue')
+    #              )
+    # p.add_layout(Label(x=8.7, y=1.4e6,
+    #                    text='1-NeuAc', render_mode='css',
+    #                    text_align='center',
+    #                    text_color='orange')
+    #              )
+    # p.add_layout(Label(x=9.9, y=1.4e6,
+    #                    text='2-NeuAc & Extended', render_mode='css',
+    #                   text_align='left',
+    #                    text_color='green')
+    #              )
+    #
 
-
-    p.add_layout(Arrow(start=TeeHead(line_color='blue'), end=TeeHead(line_color='blue'),
-                       x_start=7.8, x_end=8.25,
-                       y_start=1e6, y_end=1e6,
-                       line_width=1, line_color="blue",
-                       ))
-    p.add_layout(Arrow(start=TeeHead(line_color='orange'), end=TeeHead(line_color='orange'),
-                       x_start=8.4, x_end=8.85,
-                       y_start=1e6, y_end=1e6,
-                       line_color='orange'
-                       ))
-    p.add_layout(Arrow(start=TeeHead(line_color='green'), end=TeeHead(line_color='green'),
-                       x_start=9.3, x_end=10.2,
-                       y_start=1e6, y_end=1e6,
-                       line_color='green'
-                       ))
+    # p.add_layout(Arrow(start=TeeHead(line_color='blue'), end=TeeHead(line_color='blue'),
+    #                    x_start=7.8, x_end=8.25,
+    #                    y_start=1e6, y_end=1e6,
+    #                    line_width=1, line_color="blue",
+    #                    ))
+    # p.add_layout(Arrow(start=TeeHead(line_color='orange'), end=TeeHead(line_color='orange'),
+    #                    x_start=8.4, x_end=8.85,
+    #                    y_start=1e6, y_end=1e6,
+    #                    line_color='orange'
+    #                    ))
+    # p.add_layout(Arrow(start=TeeHead(line_color='green'), end=TeeHead(line_color='green'),
+    #                    x_start=9.3, x_end=10.2,
+    #                    y_start=1e6, y_end=1e6,
+    #                    line_color='green'
+    #                    ))
 
 
 
@@ -221,24 +222,24 @@ def plot_butterfly_xic_from_pickles(pkl_file_name1, pkl_file_name2):
 
 def execute(only_plot_from_pickle=True):
 
-    ctrl = 'control_xic_data_801.pkl'
-    dox = 'dox_xic_data_901.pkl'
+    ctrl = 'control_xic_data_802.pkl'
+    dox = 'dox_xic_data_902.pkl'
     DIRPATH = r'O:\Analytics\Lab data backup\Orbitrap Fusion\2019\Apr\CalnexinLongRunMay'
 
     if not only_plot_from_pickle:
 
         combined_dfs_control = do_xic(
-            os.path.join(DIRPATH, r'801_sCANX_Ctrl_TryGluC_12ug_C18_ITHCD30_mz200_1650_210min_RD7_1.mzML'),
+            os.path.join(DIRPATH, r'802_sCANX_Ctrl_TryGluC_12ug_C18_ITHCD30_mz200_1650_210min_RD7_2.mzML'),
             ctrl)
 
         combined_dfs_dox = do_xic(
-            os.path.join(DIRPATH, r'901_sCANX_DOX_TryGluC_12ug_C18_ITHCD30_mz200_1650_210min_RD8_1.mzML'),
+            os.path.join(DIRPATH, r'902_sCANX_DOX_TryGluC_12ug_C18_ITHCD30_mz200_1650_210min_RD8_2.mzML'),
             dox)
 
     # plot_xic_from_pickle('control_xic_data.pkl')
     # plot_xic_from_pickle('dox_xic_data.pkl')
-    plot_butterfly_xic_from_pickles(ctrl, dox)
+    plot_butterfly_xic_from_pickles(ctrl, dox, rt_correction=(0,-0.5))
 
 if __name__ == "__main__":
 
-    execute(only_plot_from_pickle=False)
+    execute(only_plot_from_pickle=True)
