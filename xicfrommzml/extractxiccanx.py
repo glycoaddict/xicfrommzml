@@ -89,17 +89,29 @@ def get_list_of_ions(gradient='long'):
 
 
 def do_xic(filename_in, pickle_save_name):
+    """
+
+    :param filename_in:
+    :param pickle_save_name:
+    :return:
+    """
     # filename_in = r'O:\Analytics\Lab data backup\Orbitrap Fusion\2019\Apr\Calnexin\sCANX_New_Ctrl_Try+GluC_24ug_4ug_ul_C18_OT_EtHCD40_targeted_mz200_2000_90min_RD7_2.mzML'
+
     # this replaces an obsolete OBO entry with a valid one; needed for MSConverted mzml files.
     filename_in = fix_obo_in_mzml_file(filename_in)
 
     combined_dfs = OrderedDict()
 
+    # initialise the plot
     p = figure(plot_width=400, plot_height=400)
 
-
+    # cycle through a list of ions obtained from a function and get the XIC
+    # this is an inefficient way as we have to reopen the MS as you cycle through each ion
+    # would be better to open once and grab all the xic needed.
     for ion_tuple in get_list_of_ions():
         t = thermo(filename_in=filename_in)
+
+        # get the XIC based on mz, rt, rt_window
         a = t.xic(ion_tuple[0], ion_tuple[1], ion_tuple[2])
         combined_dfs[str(ion_tuple[0])] = a
     #     p.line(a['rt'], a['intensity'], line_width=2, legend=ion_tuple[3], color=ion_tuple[4])
@@ -115,8 +127,8 @@ def do_xic(filename_in, pickle_save_name):
     return combined_dfs
 
 
-def get_default_plot():
-    p = figure(plot_width=800, plot_height=400, title='Extracted Ion Chromatograms of V[42]EDSKPDTTAPPSSPK[57] O-glycopeptides')
+def get_default_plot(title='Extracted Ion Chromatograms of V[42]EDSKPDTTAPPSSPK[57] O-glycopeptides'):
+    p = figure(plot_width=800, plot_height=400, title=title or 'Plot')
     p.xgrid.grid_line_color = None
     p.ygrid.grid_line_color = None
     # p.y_range = Range1d(-2.5e6, 2.5e6)
